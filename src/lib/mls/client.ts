@@ -29,6 +29,8 @@ import type {
   CreateOpenMlsKeyPackageInput,
   ExportedClientState,
   ExportedGroupState,
+  ExportGroupSecretInput,
+  ExportGroupSecretRecord,
   JoinFromWelcomeInput,
   OpenMlsApplicationMessage,
   OpenMlsGroupRecord,
@@ -201,6 +203,16 @@ export class OpenMlsClient {
       { clientId: string; state: ExportedGroupState },
       OpenMlsGroupRecord
     >("import_group_state", input);
+  }
+
+  async exportGroupSecret(
+    input: ExportGroupSecretInput,
+  ): Promise<ExportGroupSecretRecord> {
+    assertWebRuntime();
+    return callOpenMlsJsonMethod<ExportGroupSecretInput, ExportGroupSecretRecord>(
+      "export_group_secret",
+      input,
+    );
   }
 }
 

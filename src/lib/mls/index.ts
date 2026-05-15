@@ -45,6 +45,8 @@ export type {
   CreateOpenMlsGroupInput,
   CreateOpenMlsIdentityInput,
   CreateOpenMlsKeyPackageInput,
+  ExportGroupSecretInput,
+  ExportGroupSecretRecord,
   JoinFromWelcomeInput,
   OpenMlsApplicationMessage,
   OpenMlsBasicIdentity,

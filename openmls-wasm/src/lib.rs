@@ -117,6 +117,24 @@ struct ExportGroupStateRequest {
     group_id: String,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ExportGroupSecretRequest {
+    client_id: String,
+    group_id: String,
+    label: String,
+    context: String,
+    length: usize,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExportGroupSecretResponse {
+    group_id: String,
+    epoch: u64,
+    secret: String,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ExportedGroupState {
@@ -845,6 +863,37 @@ pub fn import_group_state(request_json: String) -> Result<String, JsValue> {
         });
 
         to_json_string(&response)
+    })
+}
+
+#[wasm_bindgen]
+pub fn export_group_secret(request_json: String) -> Result<String, JsValue> {
+    let request: ExportGroupSecretRequest = parse_json(&request_json)?;
+    let context = decode_base64(&request.context)?;
+
+    lookup_client(&request.client_id, |client| {
+        GROUPS.with(|groups| {
+            let groups = groups.borrow();
+            let stored_group = groups.get(&group_state_key(&request.client_id, &request.group_id)).ok_or_else(|| {
+                JsValue::from_str(&format!(
+                    "unknown MLS group {} for client {}",
+                    request.group_id, request.client_id
+                ))
+            })?;
+
+            let secret_bytes = stored_group
+                .group
+                .export_secret(&client.provider, &request.label, &context, request.length)
+                .map_err(|error| {
+                    JsValue::from_str(&format!("secret export failed: {error:?}"))
+                })?;
+
+            to_json_string(&ExportGroupSecretResponse {
+                group_id: request.group_id,
+                epoch: group_epoch_to_u64(stored_group.group.epoch()),
+                secret: BASE64.encode(&secret_bytes),
+            })
+        })
     })
 }
 

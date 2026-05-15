@@ -25,7 +25,8 @@ export type OpenMlsWasmOperation =
   | "export_client_state"
   | "import_client_state"
   | "export_group_state"
-  | "import_group_state";
+  | "import_group_state"
+  | "export_group_secret";
 
 export interface ExportedClientState {
   userId: string;
@@ -146,4 +147,18 @@ export interface ProcessIncomingMessageInput {
   clientId: string;
   groupId: string;
   message: string;
+}
+
+export interface ExportGroupSecretInput {
+  clientId: string;
+  groupId: string;
+  label: string;
+  context: string;
+  length: number;
+}
+
+export interface ExportGroupSecretRecord {
+  groupId: string;
+  epoch: number;
+  secret: string;
 }
